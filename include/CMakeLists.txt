@@ -1,0 +1,83 @@
+set(SCELTA_HEADER_FILES
+    scelta.hpp
+    scelta/meta.hpp
+    scelta/traits.hpp
+    scelta/support/variant/eggs.hpp
+    scelta/support/variant/boost.hpp
+    scelta/support/variant/type_safe.hpp
+    scelta/support/variant/mpark.hpp
+    scelta/support/variant/std.hpp
+    scelta/support/variant/enable/eggs.hpp
+    scelta/support/variant/enable/boost.hpp
+    scelta/support/variant/enable/type_safe.hpp
+    scelta/support/variant/enable/mpark.hpp
+    scelta/support/variant/enable/std.hpp
+    scelta/support/optional/tl.hpp
+    scelta/support/optional/boost.hpp
+    scelta/support/optional/type_safe.hpp
+    scelta/support/optional/std.hpp
+    scelta/support/optional/enable/tl.hpp
+    scelta/support/optional/enable/boost.hpp
+    scelta/support/optional/enable/type_safe.hpp
+    scelta/support/optional/enable/std.hpp
+    scelta/support/variant.hpp
+    scelta/support/optional.hpp
+    scelta/support.hpp
+    scelta/recursive/placeholder.hpp
+    scelta/recursive/visit.hpp
+    scelta/recursive/match.hpp
+    scelta/recursive/builder.hpp
+    scelta/recursive/original_type.hpp
+    scelta/utils.hpp
+    scelta/recursive.hpp
+    scelta/nonrecursive.hpp
+    scelta/match/match.hpp
+    scelta/match.hpp
+    scelta/traits/optional/make_unset.hpp
+    scelta/traits/optional/access.hpp
+    scelta/traits/optional/make.hpp
+    scelta/traits/optional.hpp
+    scelta/traits/adt.hpp
+    scelta/traits/adt/visit_optional.hpp
+    scelta/traits/adt/alternatives.hpp
+    scelta/traits/adt/valid.hpp
+    scelta/traits/adt/visit.hpp
+    scelta/traits/adt/is_visitable.hpp
+    scelta/traits/dispatch.hpp
+    scelta/meta/copy_cv_ptr_ref.hpp
+    scelta/meta/replace_all.hpp
+    scelta/meta/type_wrapper.hpp
+    scelta/meta/fn_ref_wrapper.hpp
+    scelta/meta/forward_like.hpp
+    scelta/meta/y_combinator.hpp
+    scelta/meta/always_false.hpp
+    scelta/utils/access_optional.hpp
+    scelta/utils/visit_optional.hpp
+    scelta/utils/assert.hpp
+    scelta/utils/optional_monadic.hpp
+    scelta/utils/optional_monadic_infix.hpp
+    scelta/utils/linear_overload.hpp
+    scelta/utils/returns.hpp
+    scelta/utils/nullopt.hpp
+    scelta/utils/optional_utils.hpp
+    scelta/utils/overload.hpp
+    scelta/utils/homogenizer.hpp
+    scelta/utils/nothing.hpp
+    scelta/utils/fwd.hpp
+    scelta/nonrecursive/visit.hpp
+    scelta/nonrecursive/match.hpp
+)
+
+foreach(_header_file ${SCELTA_HEADER_FILES})
+    list(APPEND SCELTA_BUILD_INTERFACE_HEADER_FILES "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${_header_file}>")
+endforeach()
+
+foreach(_header_file ${SCELTA_HEADER_FILES})
+    list(APPEND SCELTA_INSTALL_INTERFACE_HEADER_FILES "$<INSTALL_INTERFACE:include/${_header_file}>")
+endforeach()
+
+target_sources(headers
+    INTERFACE
+    ${SCELTA_BUILD_INTERFACE_HEADER_FILES}
+    ${SCELTA_INSTALL_INTERFACE_HEADER_FILES}
+)

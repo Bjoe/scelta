@@ -2,47 +2,115 @@
 # MIT License |  https://opensource.org/licenses/MIT
 # http://vittorioromeo.info | vittorio.romeo@outlook.com
 
-cmake_minimum_required(VERSION 3.6)
-
-# Include `vrm_cmake`.
-list(APPEND CMAKE_MODULE_PATH
-    "${CMAKE_SOURCE_DIR}/cmake/"
-    "${CMAKE_SOURCE_DIR}/../vrm_cmake/cmake/"
-    "${CMAKE_SOURCE_DIR}/extlibs/vrm_cmake/cmake/")
-
-include(vrm_cmake)
+cmake_minimum_required(VERSION 3.8)
 
 # Basic project setup.
-project(scelta CXX)
-enable_testing()
+project(scelta VERSION 0.1)
 
-vrm_cmake_init_project_name_upper()
-vrm_cmake_init_project_source_dir()
-vrm_cmake_init_project_common_module_paths()
-
-# vrm_cmake_find_extlib(vrm_pp)
-# vrm_cmake_find_extlib(vrm_core)
-
-# Alias the include directory.
-set(SCELTA_INC_DIR "${SCELTA_SOURCE_DIR}/include/")
-include_directories("${SCELTA_INC_DIR}")
+option(SCELTA_ENABLE_TESTING  "Enable unit tests" OFF)
+option(SCELTA_ENABLE_EXAMPLES "Enable examples" OFF)
 
 # Other compiler flags.
-vrm_cmake_add_common_compiler_flags()
+string(APPEND CMAKE_CXX_FLAGS
+    " -Weverything"
+    " -Wno-c++98-compat"
+    " -Wno-c++98-compat-pedantic"
+    " -Wno-missing-prototypes"
+    " -Wno-newline-eof"
+    " -Wno-reserved-id-macro"
+    " -Wno-exit-time-destructors"
+    " -Wno-global-constructors"
+    " -Wno-missing-variable-declarations"
+    " -Wno-header-hygiene"
+    " -Wno-conversion"
+    " -Wno-float-equal"
+    " -Wno-old-style-cast"
+    " -Wno-unused-macros"
+    " -Wno-class-varargs"
+    " -Wno-padded"
+    " -Wno-weak-vtables"
+    " -Wno-date-time"
+    " -Wno-unneeded-member-function"
+    " -Wno-covered-switch-default"
+    " -Wno-range-loop-analysis"
+    " -Wno-unused-member-function"
+    " -Wno-switch-enum"
+    " -Wno-double-promotion"
+    " -Wno-injected-class-name"
+    " -Wno-gnu-statement-expression"
+    " -Wno-unused-lambda-capture"
+    " -Wno-documentation-unknown-command"
+    " -Wsuggest-attribute=pure"
+    " -Wsuggest-attribute=const"
+    " -Wsuggest-attribute=noreturn"
+    " -Wsuggest-attribute=format"
+)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z")
-vrm_cmake_add_common_compiler_flags_suggest_attribute()
+add_library(headers INTERFACE)
 
-# The `check` target runs all tests.
-vrm_check_target()
+add_subdirectory(include)
 
-# Setup subdirectories.
-add_subdirectory(test)
-add_subdirectory(example)
+target_include_directories(headers INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+    $<INSTALL_INTERFACE:include>)
 
-# Create header-only install target (automatically glob)
-vrm_cmake_header_only_install_glob("${SCELTA_INC_DIR}" "include")
+target_compile_features(headers INTERFACE cxx_std_17)
 
-# Allow parent projects to depend on Scelta by adding
-# `scelta::headers` to the list of target_link_libraries.
-add_library( scelta::headers ALIAS HEADER_ONLY_TARGET )
+# Introduce variables:
+# * CMAKE_INSTALL_LIBDIR
+# * CMAKE_INSTALL_BINDIR
+# * CMAKE_INSTALL_INCLUDEDIR
+include(GNUInstallDirs)
+
+set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+install(TARGETS headers
+  EXPORT "${TARGETS_EXPORT_NAME}"
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(FILES include/scelta.hpp DESTINATION include)
+install(DIRECTORY include/scelta DESTINATION include)
+
+include(CMakePackageConfigHelpers)
+
+# Use:
+# * PROJECT_VERSION
+write_basic_package_version_file(
+    "${version_config}" COMPATIBILITY SameMajorVersion
+)
+
+# Use:
+# * TARGETS_EXPORT_NAME
+# * PROJECT_NAME
+configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
+    "${project_config}"
+    INSTALL_DESTINATION "${config_install_dir}"
+)
+
+install(
+    FILES "${project_config}" "${version_config}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    NAMESPACE "${namespace}"
+    DESTINATION "${config_install_dir}"
+)
+
+if(SCELTA_ENABLE_TESTING)
+    enable_testing()
+    # Setup subdirectories.
+    add_subdirectory(test)
+endif()
+if(SCELTA_ENABLE_EXAMPLES)
+    add_subdirectory(example)
+endif()
+
